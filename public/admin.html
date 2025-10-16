@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cryptra 後台客服中心</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      background: #0a0f1e;
+      color: white;
+      font-family: "Noto Sans TC", sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #00bcd4;
+      text-align: center;
+    }
+    #messages {
+      background: #111;
+      height: 400px;
+      overflow-y: auto;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    #input {
+      width: 80%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    #send {
+      background: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧑‍💻 Cryptra 客服後台</h1>
+  <div id="messages"></div>
+  <input id="input" placeholder="輸入回覆..." />
+  <button id="send">送出</button>
+
+  <script>
+    const socket = io();
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+    send.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    socket.on("userMessage", msg => {
+      append("👤 訪客: " + msg);
+    });
+
+    function sendMessage() {
+      const msg = input.value.trim();
+      if (!msg) return;
+      socket.emit("adminMessage", msg);
+      append("💬 你: " + msg);
+      input.value = "";
+    }
+
+    function append(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryptra - 虛擬貨幣交易平台</title>
+    <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #0a0f1e;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+      background: rgba(10, 15, 30, 0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    header h1 {
+      font-size: 1.5em;
+      color: #00d4ff;
+    }
+    header .user {
+      font-size: 1em;
+      color: #fff;
+    }
+    header .user span {
+      color: #00d4ff;
+    }
+    .hero {
+      text-align: center;
+      padding: 100px 20px 60px;
+    }
+    .hero h2 {
+      font-size: 2.8em;
+      color: #fff;
+    }
+    .hero p {
+      color: #bbb;
+    }
+    .hero button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    .hero button:hover {
+      background-color: #00d4ff;
+      box-shadow: 0 0 15px #00d4ff;
+    }
+    .features {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 40px;
+    }
+    .feature {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      width: 280px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,212,255,0.1);
+      transition: 0.3s;
+    }
+    .feature:hover {
+      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+      transform: translateY(-5px);
+    }
+    .market {
+      padding: 40px 60px;
+      text-align: center;
+      background: rgba(255,255,255,0.03);
+      border-radius: 20px;
+      margin: 40px auto;
+      width: 90%;
+      box-shadow: 0 0 20px rgba(0,212,255,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    th {
+      color: #00d4ff;
+    }
+    .chart-section {
+      background: rgba(255,255,255,0.03);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0,212,255,0.2);
+    }
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      margin: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background-color: #00d4ff;
+      box-shadow: 0 0 10px #00d4ff;
+    }
+    canvas#bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <!-- 🔔 公告橫幅 -->
+  <div id="announcement-bar">
+    <span id="announcement-text">載入最新公告中...</span>
+  </div>
+
+  <!-- 以下是你原本的主頁內容（保持不變） -->
+
+<canvas id="bgCanvas"></canvas>
+
+<header>
+  <h1>💠 Cryptra</h1>
+  <div class="user">👤 歡迎回來，<span>monke</span></div>
+</header>
+
+<section class="hero">
+  <h2>歡迎來到 Cryptra</h2>
+  <p>安全、快速、專業的虛擬貨幣交易平台</p>
+  <button>開始交易</button>
+</section>
+
+<section class="features">
+  <div class="feature">
+    <h3>🔒 安全保障</h3>
+    <p>多層加密技術與錢包存儲，確保用戶資產安全。</p>
+  </div>
+  <div class="feature">
+    <h3>⚡ 高速交易</h3>
+    <p>低延遲撮合引擎，實時完成買賣指令。</p>
+  </div>
+  <div class="feature">
+    <h3>🌐 多幣種支持</h3>
+    <p>支援主流幣種與跨鏈資產交易。</p>
+  </div>
+</section>
+
+<!-- === 市場區塊 === -->
+<section class="market">
+  <h2 style="color: #ffd700;">熱門幣種行情</h2>
+  <div class="market-container" style="display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap;">
+
+    <!-- 幣價表格 -->
+    <div style="flex:1;min-width:300px;">
+      <table id="cryptoTable">
+        <thead>
+          <tr>
+            <th>幣種</th>
+            <th>價格 (USD)</th>
+            <th>24H 漲跌</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- 曲線圖 -->
+    <div class="chart-section" style="flex:1;min-width:400px;">
+      <div>
+        <button onclick="setRange('1')">24H</button>
+        <button onclick="setRange('7')">7D</button>
+        <button onclick="setRange('30')">30D</button>
+      </div>
+      <div id="coin-buttons" style="margin-top:10px;"></div>
+      <canvas id="priceChart" height="220"></canvas>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const apiBase = "https://api.coingecko.com/api/v3";
+let currentCoin = 'bitcoin';
+let currentRange = '7';
+let chart;
+
+const coins = [
+  { id: 'bitcoin', name: 'BTC' },
+  { id: 'ethereum', name: 'ETH' },
+  { id: 'tether', name: 'USDT' },
+  { id: 'binancecoin', name: 'BNB' },
+  { id: 'ripple', name: 'XRP' },
+  { id: 'solana', name: 'SOL' },
+  { id: 'dogecoin', name: 'DOGE' }
+];
+
+const coinButtons = document.getElementById('coin-buttons');
+coins.forEach(c => {
+  const btn = document.createElement('button');
+  btn.textContent = c.name;
+  btn.onclick = () => { currentCoin = c.id; updateChart(); };
+  coinButtons.appendChild(btn);
+});
+
+function setRange(days) {
+  currentRange = days;
+  updateChart();
+}
+
+async function updateChart() {
+  const res = await fetch(`${apiBase}/coins/${currentCoin}/market_chart?vs_currency=usd&days=${currentRange}`);
+  const data = await res.json();
+  const prices = data.prices.map(p => p[1]);
+  const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
+
+  if (chart) chart.destroy();
+
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: `${currentCoin.toUpperCase()} 價格`,
+        data: prices,
+        borderColor: '#00d4ff',
+        borderWidth: 2,
+        fill: true,
+        backgroundColor: 'rgba(0,212,255,0.15)',
+        tension: 0.35,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }},
+      scales: {
+        x: { ticks: { color: '#ccc' }, grid: { color: '#222' }},
+        y: { ticks: { color: '#ccc' }, grid: { color: '#222' }}
+      }
+    }
+  });
+}
+
+async function fetchMarket() {
+  const res = await fetch(`${apiBase}/coins/markets?vs_currency=usd&ids=${coins.map(c => c.id).join(',')}`);
+  const data = await res.json();
+  const tbody = document.querySelector("#cryptoTable tbody");
+  tbody.innerHTML = "";
+  data.forEach(coin => {
+    const changeColor = coin.price_change_percentage_24h >= 0 ? "#00ff88" : "#ff4444";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${coin.symbol.toUpperCase()}</td>
+      <td>$${coin.current_price.toLocaleString()}</td>
+      <td style="color:${changeColor};">${coin.price_change_percentage_24h.toFixed(2)}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// 啟動 + 自動更新
+fetchMarket();
+updateChart();
+setInterval(() => {
+  fetchMarket();
+  updateChart();
+}, 30000);
+
+// === 粒子背景 ===
+const canvas = document.getElementById("bgCanvas");
+const ctx2 = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const particles = Array.from({ length: 120 }, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  dx: (Math.random() - 0.5) * 1.5,
+  dy: (Math.random() - 0.5) * 1.5,
+  size: Math.random() * 2 + 1
+}));
+
+function animate() {
+  ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  ctx2.fillStyle = "#00d4ff";
+  particles.forEach(p => {
+    ctx2.beginPath();
+    ctx2.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx2.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+<!-- === 即時客服小幫手 === -->
+<link rel="stylesheet" href="css/chat.css">
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/chat.js"></script>
+<!-- 官方關於 Cryptra -->
+<footer class="cryptra-footer">
+  <div class="footer-container">
+    <h2>💠 關於 Cryptra</h2>
+    <p>
+      Cryptra 是一個致力於提供安全、快速、穩定的加密貨幣交易與即時通訊平台。
+      我們支持多幣種交易、跨資產轉換與用戶之間的安全互動。
+    </p>
+    <p>
+      使用者可在會員中心查看資產狀況、修改個人資訊與聊天紀錄。
+    </p>
+    <div class="footer-links">
+      <a href="user-center.html">使用者中心</a> |
+      <a href="dashboard.html">市場行情</a> |
+      <a href="login.html">登入</a> |
+      <a href="register.html">註冊</a>
+    </div>
+    <p class="copyright">
+      © 2025 Cryptra. All Rights Reserved.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>使用者中心 - Cryptra</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="glow-box">
+    <h2>👤 使用者中心</h2>
+
+    <div class="user-info">
+      <label>暱稱：</label>
+      <input type="text" id="nickname" placeholder="輸入新暱稱">
+      <button class="btn-glow" onclick="updateNickname()">更新暱稱</button>
+    </div>
+
+    <div class="password-change">
+      <label>更改密碼：</label>
+      <input type="password" id="oldPassword" placeholder="舊密碼">
+      <input type="password" id="newPassword" placeholder="新密碼">
+      <button class="btn-glow" onclick="changePassword()">更改密碼</button>
+    </div>
+
+    <div class="chat-history">
+      <h3>💬 聊天紀錄</h3>
+      <div id="chatRecords" class="chat-history-box">載入中...</div>
+    </div>
+  </div>
+
+  <script>
+    function updateNickname() {
+      const name = document.getElementById("nickname").value.trim();
+      if (!name) return alert("請輸入暱稱！");
+      alert("暱稱已更新為：" + name);
+    }
+
+    function changePassword() {
+      const oldP = document.getElementById("oldPassword").value;
+      const newP = document.getElementById("newPassword").value;
+      if (!oldP || !newP) return alert("請輸入完整資訊！");
+      alert("密碼修改成功！");
+    }
+
+    // 模擬讀取聊天紀錄
+    document.getElementById("chatRecords").innerHTML = `
+      <p>[你] 您好，有問題可以幫我看一下嗎？</p>
+      <p>[管理員] 當然可以，請問是哪部分呢？</p>
+      <p>[你] 登入時顯示錯誤，請協助！</p>
+    `;
+  </script>
+</body>
+</html>

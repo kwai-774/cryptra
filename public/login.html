@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>登入 - Cryptra</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .logo {
+      font-size: 32px;
+      color: #58a6ff;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+
+    .login-box {
+      background: rgba(22, 27, 34, 0.85);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.1);
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #58a6ff;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #8b949e;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #30363d;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      border-radius: 6px;
+      transition: border 0.3s;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: #58a6ff;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #00b4db, #0083b0);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #0083b0, #00b4db);
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景動畫 -->
+  <canvas id="bg"></canvas>
+
+  <div class="content">
+    <div class="logo">💠 Cryptra</div>
+
+    <div class="login-box">
+      <h2>登入 Cryptra</h2>
+      <form action="/login" method="POST">
+        <label for="username">使用者名稱</label>
+        <input type="text" name="username" id="username" required />
+
+        <label for="password">密碼</label>
+        <input type="password" name="password" id="password" required />
+
+        <button type="submit">登入</button>
+      </form>
+      <div class="register-link">
+  還沒有帳號？<a href="register.html">點我註冊</a>
+</div>
+    </div>
+    <!-- 管理員登入區塊 -->
+<hr style="margin: 30px 0; border: 0; border-top: 1px solid #30363d;">
+
+<h3 style="text-align:center; color:#58a6ff;">管理員登入</h3>
+
+<form method="POST" action="/admin-login">
+  <label for="admin-user">管理員帳號</label>
+  <input type="text" id="admin-user" name="username" placeholder="admin" required>
+
+  <label for="admin-pass">管理員密碼</label>
+  <input type="password" id="admin-pass" name="password" placeholder="••••••" required>
+
+  <button type="submit">管理員登入</button>
+</form>
+
+  </div>
+
+  <!-- 背景粒子動畫 JS -->
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+
+    let w, h;
+    let particles = [];
+
+    function resizeCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createParticles() {
+      particles = [];
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          radius: Math.random() * 2 + 1,
+          dx: (Math.random() - 0.5) * 0.5,
+          dy: (Math.random() - 0.5) * 0.5
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#00ffff';
+
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      connectParticles();
+      moveParticles();
+      requestAnimationFrame(drawParticles);
+    }
+
+    function moveParticles() {
+      for (let p of particles) {
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > w) p.dx *= -1;
+        if (p.y < 0 || p.y > h) p.dy *= -1;
+      }
+    }
+
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            ctx.strokeStyle = 'rgba(0,255,255,0.05)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    createParticles();
+    drawParticles();
+  </script>
+</body>
+</html>
