@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kwai-774/cryptra.git"
+    "url": "https://github.com/kwai-774/cryptra.git"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/kwai-774/cryptra#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "express-session": "^1.18.2"
+    "express-session": "^1.18.2",
+    "socket.io": "^4.7.5"
   }
 }
