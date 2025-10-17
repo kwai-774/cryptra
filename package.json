@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/kwai-774/cryptra#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "express-session": "^1.18.2"
   }
 }
