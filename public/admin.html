@@ -1,78 +1,240 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>Cryptra 後台客服中心</title>
-  <script src="/socket.io/socket.io.js"></script>
+  <meta charset="UTF-8">
+  <title>Cryptra 後台客服系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background: #0a0f1e;
-      color: white;
-      font-family: "Noto Sans TC", sans-serif;
-      padding: 20px;
+      margin: 0;
+      font-family: "Poppins", "微軟正黑體", sans-serif;
+      background-color: #0b0b14;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }
-    h1 {
-      color: #00bcd4;
+
+    /* 📢 公告列 */
+    .announcement {
+      background: linear-gradient(90deg, #7c3aed, #8b5cf6);
       text-align: center;
+      padding: 10px 0;
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
     }
-    #messages {
-      background: #111;
-      height: 400px;
+
+    /* 主體 */
+    .main {
+      flex: 1;
+      display: flex;
+      height: 100%;
+    }
+
+    /* 左側訪客列表 */
+    .sidebar {
+      width: 250px;
+      background: #1b1530;
+      border-right: 1px solid rgba(180, 150, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      color: #bda8ff;
+      padding: 20px;
+      border-bottom: 1px solid rgba(180, 150, 255, 0.15);
+      margin: 0;
+    }
+
+    .user-list {
+      flex: 1;
       overflow-y: auto;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
-    #input {
-      width: 80%;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-    }
-    #send {
-      background: #00bcd4;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+
+    .user-list li {
+      padding: 12px 18px;
       cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .user-list li:hover,
+    .user-list li.active {
+      background: rgba(124, 58, 237, 0.3);
+    }
+
+    /* 右側聊天室 */
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #141021;
+    }
+
+    .chat-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+      color: #cbb6ff;
+      font-weight: bold;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .user-msg {
+      background: #2b2445;
+      align-self: flex-start;
+      border: 1px solid rgba(168, 128, 255, 0.3);
+    }
+
+    .admin-msg {
+      background: linear-gradient(90deg, #6d28d9, #8b5cf6);
+      align-self: flex-end;
+      color: white;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 10px;
+      background: #1b1530;
+    }
+
+    .chat-input input {
+      flex: 1;
+      background: #2b2445;
+      border: none;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .chat-input button {
+      background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+      border: none;
+      color: white;
+      margin-left: 10px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .chat-input button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
     }
   </style>
 </head>
 <body>
-  <h1>🧑‍💻 Cryptra 客服後台</h1>
-  <div id="messages"></div>
-  <input id="input" placeholder="輸入回覆..." />
-  <button id="send">送出</button>
+  <div class="announcement">
+    📢 Cryptra 公告：系統將於今早 12:00 - 17:00 進行維護，請提前完成交易。
+  </div>
 
+  <div class="main">
+    <div class="sidebar">
+      <h2>💬 訪客列表</h2>
+      <ul class="user-list" id="userList">
+        <li class="active" data-user="all">所有訪客</li>
+      </ul>
+    </div>
+
+    <div class="chat">
+      <div class="chat-header" id="chatHeader">聊天室 - 所有訪客</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" id="adminInput" placeholder="輸入訊息..." />
+        <button id="sendBtn">發送</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const messages = document.getElementById("messages");
-    const input = document.getElementById("input");
-    const send = document.getElementById("send");
+    const userList = document.getElementById("userList");
+    const chatMessages = document.getElementById("chatMessages");
+    const adminInput = document.getElementById("adminInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatHeader = document.getElementById("chatHeader");
 
-    send.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", e => {
+    let currentUser = "all";
+    const users = new Set();
+
+    socket.on("userMessage", (msg) => {
+      if (msg.username && !users.has(msg.username)) {
+        users.add(msg.username);
+        const li = document.createElement("li");
+        li.textContent = msg.username;
+        li.dataset.user = msg.username;
+        li.onclick = () => switchUser(msg.username);
+        userList.appendChild(li);
+      }
+
+      if (currentUser === "all" || msg.username === currentUser) {
+        appendMessage(msg.username, msg.text, "user");
+      }
+    });
+
+    socket.on("adminMessage", (msg) => {
+      if (currentUser === "all" || msg.to === currentUser) {
+        appendMessage("管理員", msg.text, "admin");
+      }
+    });
+
+    function switchUser(user) {
+      currentUser = user;
+      chatHeader.textContent = `聊天室 - ${user === "all" ? "所有訪客" : user}`;
+      document.querySelectorAll(".user-list li").forEach(li => li.classList.remove("active"));
+      document.querySelector(`[data-user="${user}"]`).classList.add("active");
+      chatMessages.innerHTML = "";
+    }
+
+    function appendMessage(sender, text, type) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", type === "user" ? "user-msg" : "admin-msg");
+      msg.innerHTML = `<strong>${sender}：</strong> ${text}`;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    adminInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendMessage();
     });
 
-    socket.on("userMessage", msg => {
-      append("👤 訪客: " + msg);
-    });
-
     function sendMessage() {
-      const msg = input.value.trim();
-      if (!msg) return;
-      socket.emit("adminMessage", msg);
-      append("💬 你: " + msg);
-      input.value = "";
-    }
-
-    function append(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
+      const text = adminInput.value.trim();
+      if (!text) return;
+      socket.emit("adminMessage", { text, to: currentUser });
+      appendMessage("管理員", text, "admin");
+      adminInput.value = "";
     }
   </script>
 </body>
