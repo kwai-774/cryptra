@@ -1,0 +1,24 @@
+{
+  "name": "cryptra",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwai-774/cryptra.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kwai-774/cryptra/issues"
+  },
+  "homepage": "https://github.com/kwai-774/cryptra#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
