@@ -1,122 +1,387 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>Cryptra</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cryptra - 安全快速的加密貨幣交易平台</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/chat.js"></script>
   <style>
+    /* ======= 全局設定 ======= */
     body {
       margin: 0;
-      font-family: "Poppins", "微軟正黑體", sans-serif;
-      background-color: #0b0b14;
-      color: #eee;
+      font-family: "Noto Sans TC", sans-serif;
+      background: #0a0a12;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    /* 📢 公告列 */
-    .announcement {
-      background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+    /* 星空背景 */
+    canvas#stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    }
+
+    /* ======= 公告條 ======= */
+    .announcement-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #8b5cf6;
+      color: white;
       text-align: center;
       padding: 10px 0;
-      font-weight: bold;
-      color: #fff;
-      font-size: 0.95rem;
+      z-index: 1000;
+      font-size: 14px;
       letter-spacing: 0.5px;
     }
 
-    header {
-      text-align: center;
-      padding: 40px 20px;
-    }
-
-    .btn {
-      background: linear-gradient(90deg, #3b82f6, #60a5fa);
-      color: #fff;
-      padding: 14px 28px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      font-weight: bold;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 10px rgba(96,165,250,0.5);
-    }
-
-    /* 交易彈窗 */
-    .modal {
+    /* ======= 頂部登入訊息 ======= */
+    .top-bar {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
+      top: 45px;
+      right: 20px;
+      color: #aaa;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    .top-bar span {
+      color: #8b5cf6;
+      font-weight: bold;
     }
 
-    .modal.active {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .modal-content {
-      background: #1b1530;
-      border: 1px solid rgba(124, 58, 237, 0.4);
-      border-radius: 16px;
-      padding: 30px 40px;
+    /* ======= 主內容 ======= */
+    .main-content {
+      margin-top: 100px;
       text-align: center;
-      max-width: 400px;
+      padding: 80px 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .main-content h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .main-content p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #ccc;
+    }
+
+    .main-content button {
+      background: #3b82f6;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .main-content button:hover {
+      background: #2563eb;
+    }
+
+    /* ======= 熱門幣種區 ======= */
+    .market-section {
+      max-width: 900px;
+      margin: 80px auto;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .market-section h2 {
+      color: #ffd700;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    /* 折線圖區 */
+    #cryptoChart {
+      width: 100%;
+      height: 250px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .market-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    .market-table th, .market-table td {
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    .market-table th {
+      border-bottom: 2px solid #444;
       color: #ddd;
     }
 
-    .modal-content h2 {
-      color: #bda8ff;
+    .market-table td {
+      border-bottom: 1px solid #333;
     }
 
-    .btn-purple {
-      background: linear-gradient(90deg, #7c3aed, #8b5cf6);
-      margin-top: 15px;
+    .green { color: #4ade80; }
+    .red { color: #f87171; }
+
+    /* ======= 三大特色 ======= */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 900px;
+      margin: 60px auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px;
+      width: 260px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .feature-card h4 {
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: #ccc;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ======= 關於 Cryptra ======= */
+    .about-section {
+      max-width: 900px;
+      margin: 100px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .about-section h3 {
+      font-size: 20px;
+      color: #00bcd4;
+    }
+
+    .about-section p {
+      line-height: 1.8;
+      color: #bbb;
+    }
+
+    .about-links a {
+      color: #8b5cf6;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+
+    /* ======= 頁尾 ======= */
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      color: #666;
+      font-size: 13px;
+      border-top: 1px solid #222;
+      margin-top: 60px;
+      position: relative;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
+  <canvas id="stars"></canvas>
 
-  <!-- 公告區 -->
-  <div class="announcement">
-    📢 Cryptra 公告：系統將於今早 12:00 - 17:00 進行維護，請提前完成交易。
+  <!-- 公告 -->
+  <div class="announcement-bar">
+    📢 Cryptra 公告：客服團隊現正為您服務，提供最專業與即時的協助。
   </div>
 
-  <header>
-    <h1>歡迎來到 Cryptra</h1>
-    <p>安全、快速的交易平台</p>
-    <button class="btn" id="tradeBtn">開始交易</button>
-  </header>
+  <!-- 歡迎回來 -->
+  <div class="top-bar">👤 歡迎回來，<span>monke</span></div>
 
-  <!-- 彈出視窗 -->
-  <div class="modal" id="tradeModal">
-    <div class="modal-content">
-      <h2>💬 聯繫客服</h2>
-      <p>請先發送訊息給客服以完成交易流程。</p>
-      <button class="btn btn-purple" onclick="window.location.href='/chat.html'">前往客服</button>
-      <button class="btn" style="background:#444;margin-top:10px;" onclick="closeModal()">取消</button>
+  <!-- 主畫面 -->
+  <div class="main-content">
+    <h1>歡迎來到 <span style="color:#8b5cf6;">Cryptra</span></h1>
+    <p>安全、快速的加密貨幣交易平台</p>
+    <button>開始交易</button>
+  </div>
+
+  <!-- 熱門幣種 + 折線圖 -->
+  <div class="market-section">
+    <h2>📈 即時市場趨勢</h2>
+    <canvas id="cryptoChart"></canvas>
+
+    <h2>熱門幣種行情</h2>
+    <table class="market-table">
+      <thead>
+        <tr>
+          <th>幣種</th>
+          <th>價格 (USD)</th>
+          <th>24H 漲跌</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BTC</td><td>$110,309</td><td class="green">1.01%</td></tr>
+        <tr><td>ETH</td><td>$3,950.26</td><td class="red">-0.99%</td></tr>
+        <tr><td>BNB</td><td>$1,094.75</td><td class="red">-2.47%</td></tr>
+        <tr><td>XRP</td><td>$2.46</td><td class="green">2.47%</td></tr>
+        <tr><td>SOL</td><td>$187.66</td><td class="red">-0.97%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 三大特色 -->
+  <div class="features">
+    <div class="feature-card">
+      <h4>🔒 安全保障</h4>
+      <p>多層加密技術與錢包存儲，確保用戶資產安全。</p>
+    </div>
+    <div class="feature-card">
+      <h4>⚡ 高速交易</h4>
+      <p>低延遲撮合引擎，實時完成買賣指令。</p>
+    </div>
+    <div class="feature-card">
+      <h4>🌐 多幣種支持</h4>
+      <p>支援主流幣種與跨鏈資產交易。</p>
     </div>
   </div>
 
+  <!-- 關於 Cryptra -->
+  <div class="about-section">
+    <h3>關於 Cryptra</h3>
+    <p>
+      Cryptra 是一個致力於提供安全、快速、穩定的加密貨幣交易與即時通訊平台。
+      我們支持多幣種交易、跨資產轉換與用戶之間的安全互動，讓數位資產流通更加自由。
+      <br><br>
+      平台以「安全」與「穩定」為核心，採用多層加密技術、嚴格風控機制與冷錢包儲存，保障用戶資產安全。
+      同時，我們擁有專業的市場分析師團隊，為投資者提供即時行情洞察、策略建議與趨勢分析，
+      協助用戶在波動的市場中做出更明確的決策。
+      <br><br>
+      若您在使用平台的過程中有任何問題，Cryptra 的客服團隊將全程為您服務，
+      提供最親切、最優質、最專業的使用體驗。
+      <br><br>
+      Cryptra 不僅是一個交易平台，更是讓用戶能放心交流、共同成長的數位金融生態系。
+    </p>
+    <div class="about-links">
+      <a href="#">使用者中心</a> |
+      <a href="#">市場行情</a> |
+      <a href="#">登入</a> |
+      <a href="#">註冊</a>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Cryptra. All Rights Reserved.
+  </footer>
+
+  <!-- 折線圖動畫 -->
   <script>
-    const tradeBtn = document.getElementById('tradeBtn');
-    const tradeModal = document.getElementById('tradeModal');
+    const canvas = document.getElementById("cryptoChart");
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
-    tradeBtn.addEventListener('click', () => {
-      tradeModal.classList.add('active');
-    });
+    const lines = [
+      { color: "#8b5cf6", data: [], offset: Math.random() * 100 },
+      { color: "#3b82f6", data: [], offset: Math.random() * 100 },
+      { color: "#00bcd4", data: [], offset: Math.random() * 100 },
+    ];
 
-    function closeModal() {
-      tradeModal.classList.remove('active');
+    function drawLines() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      lines.forEach(line => {
+        ctx.beginPath();
+        for (let x = 0; x < canvas.width; x++) {
+          const y = canvas.height/2 + Math.sin((x + line.offset) * 0.02) * 40 * Math.sin(Date.now() * 0.001 + x * 0.01);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = line.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = line.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      lines.forEach(line => line.offset += 0.5);
+      requestAnimationFrame(drawLines);
     }
+    drawLines();
   </script>
+
+  <!-- 星空背景動畫 -->
+  <script>
+    const stars = document.getElementById("stars");
+    const ctxStar = stars.getContext("2d");
+    let w, h;
+    const numStars = 150;
+    const starArray = [];
+
+    function resize() {
+      w = stars.width = window.innerWidth;
+      h = stars.height = window.innerHeight;
+    }
+
+    function createStars() {
+      for (let i = 0; i < numStars; i++) {
+        starArray.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.5,
+          s: Math.random() * 0.5 + 0.2
+        });
+      }
+    }
+
+    function drawStars() {
+      ctxStar.clearRect(0, 0, w, h);
+      ctxStar.fillStyle = "#fff";
+      starArray.forEach(star => {
+        ctxStar.beginPath();
+        ctxStar.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctxStar.fill();
+        star.y += star.s;
+        if (star.y > h) star.y = 0;
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    createStars();
+    drawStars();
+  </script>
+    <!-- 開始交易按鈕連接到客服氣泡 -->
+  <script>
+    document.querySelector(".main-content button").addEventListener("click", () => {
+      const chatButton = document.querySelector(".chat-button");
+      if (chatButton) {
+        chatButton.click(); // 模擬點擊客服按鈕
+      }
+    });
+  </script>
+
 </body>
 </html>
