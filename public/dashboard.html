@@ -28,5 +28,46 @@
 </section>
 
   <a href="index.html">回主頁</a>
+<script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // 簡單的聊天室輸入
+    const username = "訪客";
+
+    // 建立輸入框與按鈕
+    const chatBox = document.createElement('div');
+    chatBox.innerHTML = `
+      <div id="chatArea" style="border:1px solid #ccc; height:200px; overflow-y:auto; padding:5px; margin-top:10px;"></div>
+      <input id="chatInput" placeholder="輸入訊息..." style="width:70%; padding:5px;">
+      <button id="sendBtn">發送</button>
+    `;
+    document.body.appendChild(chatBox);
+
+    // 發送訊息
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const msg = document.getElementById('chatInput').value.trim();
+      if (!msg) return;
+      socket.emit('userMessage', {
+        name: username,
+        message: msg
+      });
+      document.getElementById('chatInput').value = '';
+    });
+
+    // 顯示自己與管理員的訊息
+    socket.on('userMessage', data => {
+      const div = document.getElementById('chatArea');
+      div.innerHTML += `<p><b>${data.name}：</b>${data.message}</p>`;
+      div.scrollTop = div.scrollHeight;
+    });
+
+socket.on('adminMessage', data => {
+  const div = document.getElementById('chatArea');
+  div.innerHTML += `<p style="color:blue"><b>${data.name}：</b>${data.message}</p>`;
+  div.scrollTop = div.scrollHeight;
+});
+
+  </script>
 </body>
 </html>

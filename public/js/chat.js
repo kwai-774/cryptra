@@ -39,12 +39,16 @@ window.addEventListener("DOMContentLoaded", () => {
     appendMessage("admin", msg);
   });
 });
+  // 接收自己（訪客）的訊息，顯示在畫面上
+  socket.on("userMessage", (data) => {
+    appendMessage("user", `${data.name}：${data.message}`);
+  });
 
 function sendMessage() {
   const msg = inputField.value.trim();
   if (!msg) return;
   appendMessage("user", msg);
-  socket.emit("userMessage", msg);
+  socket.emit("userMessage", { name: "訪客", message: msg });
   inputField.value = "";
 }
 

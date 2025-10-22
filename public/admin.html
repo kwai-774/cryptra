@@ -186,27 +186,27 @@
 
     let currentUser = "all";
     const users = new Set();
+socket.on("userMessage", (data) => {
+  if (data.name && !users.has(data.name)) {
+    users.add(data.name);
+    const li = document.createElement("li");
+    li.textContent = data.name;
+    li.dataset.user = data.name;
+    li.onclick = () => switchUser(data.name);
+    userList.appendChild(li);
+  }
 
-    socket.on("userMessage", (msg) => {
-      if (msg.username && !users.has(msg.username)) {
-        users.add(msg.username);
-        const li = document.createElement("li");
-        li.textContent = msg.username;
-        li.dataset.user = msg.username;
-        li.onclick = () => switchUser(msg.username);
-        userList.appendChild(li);
-      }
+  if (currentUser === "all" || data.name === currentUser) {
+    appendMessage(data.name, data.message, "user");
+  }
+});
 
-      if (currentUser === "all" || msg.username === currentUser) {
-        appendMessage(msg.username, msg.text, "user");
-      }
-    });
 
-    socket.on("adminMessage", (msg) => {
-      if (currentUser === "all" || msg.to === currentUser) {
-        appendMessage("管理員", msg.text, "admin");
-      }
-    });
+socket.on("adminMessage", (data) => {
+  if (currentUser === "all" || data.to === currentUser) {
+    appendMessage(data.name, data.message, "admin");
+  }
+});
 
     function switchUser(user) {
       currentUser = user;

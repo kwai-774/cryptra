@@ -140,12 +140,10 @@ app.get('/admin/dashboard', (req, res) => {
 
         <script>
           const socket = io();
-
-          socket.on('userMessage', msg => {
-            const div = document.getElementById('messages');
-            div.innerHTML += '<p><b>訪客：</b>' + msg + '</p>';
-            div.scrollTop = div.scrollHeight;
-          });
+socket.on('userMessage', data => {
+  const div = document.getElementById('messages');
+  div.scrollTop = div.scrollHeight;
+});
 
           socket.on('adminMessage', msg => {
             const div = document.getElementById('messages');
@@ -205,15 +203,18 @@ app.delete("/api/announcements/:id", (req, res) => {
 io.on("connection", (socket) => {
   console.log("🟢 使用者連線");
 
-  socket.on("userMessage", (msg) => {
-    io.emit("userMessage", msg);
-    saveMessage("user", msg);
-  });
+socket.on("userMessage", (data) => {
+  console.log("💬 訪客傳來訊息：", data.name, data.message);
+  io.emit("userMessage", data); // 廣播給管理員
+  saveMessage(data.name, data.message); // 儲存訊息
+});
 
-  socket.on("adminMessage", (msg) => {
-    io.emit("adminMessage", msg);
-    saveMessage("admin", msg);
-  });
+socket.on("adminMessage", (msg) => {
+  const data = { name: "管理員", message: msg };
+  io.emit("adminMessage", data);
+  saveMessage("管理員", msg);
+});
+
 
   socket.on("disconnect", () => {
     console.log("🔴 使用者離線");
